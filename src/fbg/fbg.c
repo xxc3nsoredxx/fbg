@@ -149,4 +149,19 @@ void draw_line (struct screen_s *s, unsigned int color,
             draw_pixel(s, color, cur);
         }
     }
+
+    /* Vertical line */
+    else if (p1.x == p2.x) {
+        if (p1.y < p2.y) {
+            cur = p1;
+            target = p2;
+        } else {
+            cur = p2;
+            target = p1;
+        }
+
+        for (; cur.y < target.y; cur.y++) {
+            draw_pixel(s, color, cur);
+        }
+    }
 }

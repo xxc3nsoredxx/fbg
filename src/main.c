@@ -25,6 +25,10 @@ int main () {
     draw_line(scr, COLOR(0xFF,0x00,0x00), point(0,0), point(100,0));
     draw_line(scr, COLOR(0x00,0xFF,0x00), point(150,2), point(50,2));
     draw_line(scr, COLOR(0x00,0x00,0xFF), point(100,4), point(200,4));
+    /* Vertical line */
+    draw_line(scr, COLOR(0xFF,0x00,0x00), point(0,50), point(0,150));
+    draw_line(scr, COLOR(0x00,0xFF,0x00), point(2,100), point(2,200));
+    draw_line(scr, COLOR(0x00,0x00,0xFF), point(4,150), point(4,250));
     refresh(scr);
     getchar();
 
