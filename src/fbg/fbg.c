@@ -1,7 +1,9 @@
 #include <fcntl.h>
+#include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 
+#include <linux/fb.h>
 #include <sys/ioctl.h>
 #include <sys/mman.h>
 
@@ -10,13 +12,16 @@
 #define STDIN 0
 #define STDOUT 1
 #define STDERR 2
-#define ERR(MSG) (write(STDERR,MSG,strlen(MSG)))
+#define ERR(MSG) do { \
+                     write(STDERR,MSG,strlen(MSG)); \
+                 } while (0)
 
 int fb_file;
 struct fb_var_screeninfo vinfo;
 struct fb_fix_screeninfo finfo;
 struct screen_s g_scr;
-unsigned int *fb;
+unsigned int *fb2;
+unsigned int *fb_real;
 
 void __attribute__ ((constructor)) init_lib (void) {
     /* Attempt to open framebuffer */
@@ -34,35 +39,114 @@ void __attribute__ ((constructor)) init_lib (void) {
     }
 
     /* Attempt to map framebuffer to memory */
-    fb = mmap(0, finfo.smem_len, PROT_READ|PROT_WRITE,
-                 MAP_SHARED, fb_file, 0);
-    if ((long)fb == (long)MAP_FAILED) {
+    fb_real = mmap(0, finfo.smem_len, PROT_READ|PROT_WRITE,
+                   MAP_SHARED, fb_file, 0);
+    if ((long)fb_real == (long)MAP_FAILED) {
         ERR("Error mmapping framebuffer!\n");
     }
+    /* Create the back buffer */
+    fb2 = calloc(1, finfo.smem_len);
+    if (!fb2) {
+        ERR("Error creating back buffer!\n");
+    }
 
+    /* Setup global screen info */
     g_scr.width = vinfo.xres;
     g_scr.height = vinfo.yres;
-    g_scr.fb = fb;
+    g_scr.ll = finfo.line_length;
+    g_scr.bpp = vinfo.bits_per_pixel;
+    g_scr.len = finfo.smem_len;
+    g_scr.fb = fb2;
+
+    ANSI(CURS_OFF);
 }
 
 void __attribute__ ((destructor)) exit_lib (void) {
     /* Unmap framebuffer if mapped */
-    if (fb) {
-        munmap(fb, finfo.smem_len);
+    if (fb_real) {
+        munmap(fb_real, g_scr.len);
+    }
+    if (fb2) {
+        free(fb2);
     }
     /* Close framebuffer if open */
     if (fb_file > 0) {
         close(fb_file);
     }
+
+    ANSI(CURS_ON);
 }
 
 struct screen_s* get_screen (void) {
     return &g_scr;
 }
 
+void refresh (struct screen_s *s) {
+    if (!s) {
+        s = &g_scr;
+    }
+
+    memcpy(fb_real, g_scr.fb, g_scr.len);
+}
+
 void clear (struct screen_s* s) {
     if (!s) {
         s = &g_scr;
     }
-    memset(s->fb, 0x0, finfo.smem_len);
+    memset(s->fb, 0, s->len);
+    ANSI(CLEAR);
+    ANSI(X_Y(0,0));
+    refresh(s);
+}
+
+struct point_s point (unsigned int x, unsigned int y) {
+    struct point_s ret;
+
+    ret.x = x;
+    ret.y = y;
+
+    return ret;
+}
+
+void draw_pixel (struct screen_s *s, unsigned int color, struct point_s p) {
+    size_t pos;
+    unsigned int x = p.x;
+    unsigned int y = p.y;
+
+    if (!s) {
+        s = &g_scr;
+    }
+
+    pos = (y * (s->ll / (s->bpp / 8))) + x;
+
+    *(s->fb + pos) = color;
+}
+
+void draw_line (struct screen_s *s, unsigned int color,
+                struct point_s p1, struct point_s p2) {
+    struct point_s cur;
+    struct point_s target;
+
+    if (!s) {
+        s = &g_scr;
+    }
+
+    /* Draw start- and endpoints */
+    draw_pixel(s, color, p1);
+    draw_pixel(s, color, p2);
+
+    /* Horizontal line */
+    if (p1.y == p2.y) {
+        if (p1.x < p2.x) {
+            cur = p1;
+            target = p2;
+        } else {
+            cur = p2;
+            target = p1;
+        }
+
+        for (; cur.x < target.x; cur.x++) {
+            draw_pixel(s, color, cur);
+        }
+    }
 }
