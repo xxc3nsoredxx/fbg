@@ -126,6 +126,10 @@ void draw_line (struct screen_s *s, unsigned int color,
                 struct point_s p1, struct point_s p2) {
     struct point_s cur;
     struct point_s target;
+    int deltax;
+    int deltay;
+    int delta;
+    int inc;
 
     if (!s) {
         s = &g_scr;
@@ -162,6 +166,67 @@ void draw_line (struct screen_s *s, unsigned int color,
 
         for (; cur.y < target.y; cur.y++) {
             draw_pixel(s, color, cur);
+        }
+    }
+
+    /* Arbitrary line, using Bresenham's Algorithm */
+    else {
+        /* Low gradient */
+        if (abs(p2.y - p1.y) < abs(p2.x - p1.x)) {
+            if (p1.x < p2.x) {
+                cur = p1;
+                target = p2;
+            } else {
+                cur = p2;
+                target = p1;
+            }
+
+            deltax = target.x - cur.x;
+            deltay = target.y - cur.y;
+            inc = 1;
+            if (deltay < 0) {
+                inc = -1;
+                deltay = -deltay;
+            }
+            delta = 2*deltay - deltax;
+
+            for (; cur.x < target.x; cur.x++) {
+                draw_pixel(s, color, cur);
+                if (delta > 0) {
+                    cur.y += inc;
+                    delta -= 2*deltax;
+                }
+                delta += 2*deltay;
+            }
+        }
+
+        /* High gradient */
+        else {
+            if (p1.y < p2.y) {
+                cur = p1;
+                target = p2;
+            } else {
+                cur = p2;
+                target = p1;
+            }
+
+            deltax = target.x - cur.x;
+            deltay = target.y - cur.y;
+            inc = 1;
+            if (deltax < 0) {
+                inc = -1;
+                deltax = -deltax;
+            }
+            delta = 2*deltax - deltay;
+
+            for (; cur.y < target.y; cur.y++) {
+                draw_pixel(s, color, cur);
+                if (delta > 0) {
+                    cur.x += inc;
+                    delta -= 2*deltay;
+                }
+                delta += 2*deltax;
+            }
         }
     }
 }
