@@ -230,3 +230,35 @@ void draw_line (struct screen_s *s, unsigned int color,
         }
     }
 }
+
+void draw_rect (struct screen_s *s, unsigned int l_color, unsigned int f_color,
+                struct point_s tl, struct point_s br, char fill) {
+    /* The other two corners */
+    struct point_s tr;
+    struct point_s bl;
+
+    if (!s) {
+        s = &g_scr;
+    }
+
+    tr.x = br.x;
+    tr.y = tl.y;
+    bl.x = tl.x;
+    bl.y = br.y;
+
+    draw_line(s, l_color, tl, tr);
+    draw_line(s, l_color, tr, br);
+    draw_line(s, l_color, br, bl);
+    draw_line(s, l_color, bl, tl);
+
+    if (fill) {
+        /* Move points inward by one */
+        tl.x++;
+        tl.y++;
+        tr.x--;
+        tr.y++;
+        for (; tl.y < bl.y; tl.y++, tr.y++) {
+            draw_line(s, f_color, tl, tr);
+        }
+    }
+}

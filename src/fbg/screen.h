@@ -17,6 +17,11 @@
  * Creates an int representing the RGB color
  */
 #define COLOR(R,G,B) (0 | ((R) << 16) | ((G) << 8) | (B))
+/* Basic colors */
+#define COLOR_NONE  0
+#define COLOR_RED   COLOR(0xFF,0x00,0x00)
+#define COLOR_GREEN COLOR(0x00,0xFF,0x00)
+#define COLOR_BLUE  COLOR(0x00,0x00,0xFF)
 
 struct screen_s {
     unsigned int width;
@@ -67,5 +72,13 @@ void draw_pixel (struct screen_s *s, unsigned int color, struct point_s p);
  */
 void draw_line (struct screen_s *s, unsigned int color,
                 struct point_s p1, struct point_s p2);
+
+/*
+ * Draws a rectangle given the line color, fill color, and
+ * top left/bottom right corners
+ * Only fill rectangle if fill is set
+ */
+void draw_rect (struct screen_s *s, unsigned int l_color, unsigned int f_color,
+                struct point_s tl, struct point_s br, char fill);
 
 #endif
