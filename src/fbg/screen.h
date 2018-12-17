@@ -89,4 +89,11 @@ void draw_circle (struct screen_s *s, unsigned int l_color,
                     unsigned int f_color, struct point_s c,
                     unsigned int radius, char fill);
 
+/*
+ * Draw arbitrary polygons by supplying an array of points (drawn in order)
+ * The last point automatically gets connected to the first
+ */
+void draw_poly (struct screen_s *s, unsigned int l_color, unsigned int f_color,
+                struct point_s *points, size_t len, char fill);
+
 #endif

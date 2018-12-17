@@ -4,6 +4,9 @@
 
 int main () {
     struct screen_s *scr;
+    struct point_s three [3];
+    struct point_s four [4];
+    struct point_s five [5];
 
     scr = get_screen();
 
@@ -62,9 +65,36 @@ int main () {
     refresh(scr);
     getchar();
 
+    /* Test polygon drawing */
     clear(scr);
     refresh(scr);
+    /* Unfilled 3-sided shape */
+    three[0] = point(10,10);
+    three[1] = point(10,100);
+    three[2] = point(100,100);
+    draw_poly(scr, COLOR_RED, COLOR_NONE, three,
+                sizeof(three)/sizeof(*three), 0);
+    /* Unfilled 4-sided shape */
+    four[0] = point(150,30);
+    four[1] = point(120,100);
+    four[2] = point(150,50);
+    four[3] = point(200,75);
+    draw_poly(scr, COLOR_GREEN, COLOR_NONE, four,
+                sizeof(four)/sizeof(*four), 0);
+    /* Unfilled 5-sided shape */
+    five[0] = point(250,100);
+    five[1] = point(300,100);
+    five[2] = point(300,50);
+    five[3] = point(275,25);
+    five[4] = point(250,50);
+    draw_poly(scr, COLOR_BLUE, COLOR_NONE, five,
+                sizeof(five)/sizeof(*five), 0);
+    refresh(scr);
+    getchar();
 
+    /* Print screen info at the end */
+    clear(scr);
+    refresh(scr);
     printf("Width: %u\n", scr->width);
     printf("Height: %u\n", scr->height);
     printf("Line lenght: %lu\n", scr->ll);

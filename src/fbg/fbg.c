@@ -323,3 +323,22 @@ void draw_circle (struct screen_s *s, unsigned int l_color,
         }
     }
 }
+
+void draw_poly (struct screen_s *s, unsigned int l_color, unsigned int f_color,
+                struct point_s *points, size_t len, char fill) {
+    size_t cx;
+
+    if (!s) {
+        s = &g_scr;
+    }
+
+    /* Do nothing if points is NULL or length given as empty */
+    if (!points || !len) {
+        return;
+    }
+
+    for (cx = 0; cx < len - 1; cx++) {
+        draw_line(s, l_color, points[cx], points[cx + 1]);
+    }
+    draw_line(s, l_color, points[len - 1], points[0]);
+}
