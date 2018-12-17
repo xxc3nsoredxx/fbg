@@ -298,6 +298,18 @@ void draw_circle (struct screen_s *s, unsigned int l_color,
         draw_point(s, l_color, point(c.x - cur.x, c.y - cur.y));
         draw_point(s, l_color, point(c.x - cur.y, c.y - cur.x));
 
+        /* Fill the inside */
+        if (fill) {
+            draw_line(s, f_color, point(c.x + cur.x - 1, c.y + cur.y),
+                                  point(c.x + cur.x - 1, c.y - cur.y));
+            draw_line(s, f_color, point(c.x + cur.y, c.y + cur.x - 1),
+                                  point(c.x + cur.y, c.y - cur.x + 1));
+            draw_line(s, f_color, point(c.x - cur.x + 1, c.y + cur.y),
+                                  point(c.x - cur.x + 1, c.y - cur.y));
+            draw_line(s, f_color, point(c.x - cur.y, c.y + cur.x - 1),
+                                  point(c.x - cur.y, c.y - cur.x + 1));
+        }
+
         if (err <= 0) {
             cur.y++;
             err += deltay;

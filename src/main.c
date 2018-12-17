@@ -56,9 +56,9 @@ int main () {
     draw_circle(scr, COLOR_GREEN, COLOR_NONE, point(125,125), 100, 0);
     draw_circle(scr, COLOR_BLUE, COLOR_NONE, point(150,150), 100, 0);
     /* Filled circles */
-    draw_circle(scr, COLOR_RED, COLOR_BLUE, point(200,300), 100, 1);
-    draw_circle(scr, COLOR_GREEN, COLOR_RED, point(225,325), 100, 1);
-    draw_circle(scr, COLOR_BLUE, COLOR_GREEN, point(250,350), 100, 1);
+    draw_circle(scr, COLOR_RED, COLOR_BLUE, point(200,350), 100, 1);
+    draw_circle(scr, COLOR_GREEN, COLOR_RED, point(400,400), 100, 1);
+    draw_circle(scr, COLOR_BLUE, COLOR_GREEN, point(600,450), 100, 1);
     refresh(scr);
     getchar();
 
