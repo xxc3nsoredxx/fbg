@@ -60,12 +60,12 @@ void refresh (struct screen_s *s);
 void clear (struct screen_s *s);
 
 /*
- * Draw a pixel to the screen at location (x,y)
+ * Draw a point to the screen at location (x,y)
  * s is the pointer to the screen
  * if s is NULL use global screen
  * color is an integer with RGB
  */
-void draw_pixel (struct screen_s *s, unsigned int color, struct point_s p);
+void draw_point (struct screen_s *s, unsigned int color, struct point_s p);
 
 /*
  * Draws a line between p1 amd p2
@@ -80,5 +80,13 @@ void draw_line (struct screen_s *s, unsigned int color,
  */
 void draw_rect (struct screen_s *s, unsigned int l_color, unsigned int f_color,
                 struct point_s tl, struct point_s br, char fill);
+
+/*
+ * Draws a circle given the center, radius, line color, and fill color
+ * Only fill circle if fill is set
+ */
+void draw_circle (struct screen_s *s, unsigned int l_color,
+                    unsigned int f_color, struct point_s c,
+                    unsigned int radius, char fill);
 
 #endif

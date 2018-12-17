@@ -10,9 +10,9 @@ int main () {
     /* Test pixel drawing */
     clear(scr);
     getchar();
-    draw_pixel(scr, COLOR_RED, point(0, 0));
-    draw_pixel(scr, COLOR_GREEN, point(5, 0));
-    draw_pixel(scr, COLOR_BLUE, point(5, 10));
+    draw_point(scr, COLOR_RED, point(0, 0));
+    draw_point(scr, COLOR_GREEN, point(5, 0));
+    draw_point(scr, COLOR_BLUE, point(5, 10));
     refresh(scr);
     getchar();
 
@@ -45,6 +45,20 @@ int main () {
     draw_rect(scr, COLOR_RED, COLOR_BLUE, point(0,100), point(50,200), 1);
     draw_rect(scr, COLOR_GREEN, COLOR_RED, point(10,110), point(60,210), 1);
     draw_rect(scr, COLOR_BLUE, COLOR_GREEN, point(20,120), point(70,220), 1);
+    refresh(scr);
+    getchar();
+
+    /* Test circle drawing */
+    clear(scr);
+    refresh(scr);
+    /* Unfilled circles */
+    draw_circle(scr, COLOR_RED, COLOR_NONE, point(100,100), 100, 0);
+    draw_circle(scr, COLOR_GREEN, COLOR_NONE, point(125,125), 100, 0);
+    draw_circle(scr, COLOR_BLUE, COLOR_NONE, point(150,150), 100, 0);
+    /* Filled circles */
+    draw_circle(scr, COLOR_RED, COLOR_BLUE, point(200,300), 100, 1);
+    draw_circle(scr, COLOR_GREEN, COLOR_RED, point(225,325), 100, 1);
+    draw_circle(scr, COLOR_BLUE, COLOR_GREEN, point(250,350), 100, 1);
     refresh(scr);
     getchar();
 

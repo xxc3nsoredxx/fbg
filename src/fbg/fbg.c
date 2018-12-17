@@ -108,13 +108,18 @@ struct point_s point (unsigned int x, unsigned int y) {
     return ret;
 }
 
-void draw_pixel (struct screen_s *s, unsigned int color, struct point_s p) {
+void draw_point (struct screen_s *s, unsigned int color, struct point_s p) {
     size_t pos;
     unsigned int x = p.x;
     unsigned int y = p.y;
 
     if (!s) {
         s = &g_scr;
+    }
+
+    /* Test bounds */
+    if (x >= s->width || y >= s->height) {
+        return;
     }
 
     pos = (y * (s->ll / (s->bpp / 8))) + x;
@@ -136,8 +141,8 @@ void draw_line (struct screen_s *s, unsigned int color,
     }
 
     /* Draw start- and endpoints */
-    draw_pixel(s, color, p1);
-    draw_pixel(s, color, p2);
+    draw_point(s, color, p1);
+    draw_point(s, color, p2);
 
     /* Horizontal line */
     if (p1.y == p2.y) {
@@ -150,7 +155,7 @@ void draw_line (struct screen_s *s, unsigned int color,
         }
 
         for (; cur.x < target.x; cur.x++) {
-            draw_pixel(s, color, cur);
+            draw_point(s, color, cur);
         }
     }
 
@@ -165,7 +170,7 @@ void draw_line (struct screen_s *s, unsigned int color,
         }
 
         for (; cur.y < target.y; cur.y++) {
-            draw_pixel(s, color, cur);
+            draw_point(s, color, cur);
         }
     }
 
@@ -191,7 +196,7 @@ void draw_line (struct screen_s *s, unsigned int color,
             delta = 2*deltay - deltax;
 
             for (; cur.x < target.x; cur.x++) {
-                draw_pixel(s, color, cur);
+                draw_point(s, color, cur);
                 if (delta > 0) {
                     cur.y += inc;
                     delta -= 2*deltax;
@@ -220,7 +225,7 @@ void draw_line (struct screen_s *s, unsigned int color,
             delta = 2*deltax - deltay;
 
             for (; cur.y < target.y; cur.y++) {
-                draw_pixel(s, color, cur);
+                draw_point(s, color, cur);
                 if (delta > 0) {
                     cur.x += inc;
                     delta -= 2*deltay;
@@ -259,6 +264,50 @@ void draw_rect (struct screen_s *s, unsigned int l_color, unsigned int f_color,
         tr.y++;
         for (; tl.y < bl.y; tl.y++, tr.y++) {
             draw_line(s, f_color, tl, tr);
+        }
+    }
+}
+
+void draw_circle (struct screen_s *s, unsigned int l_color,
+                    unsigned int f_color, struct point_s c,
+                    unsigned int radius, char fill) {
+    struct point_s cur;
+    int deltax;
+    int deltay;
+    int err;
+
+    if (!s) {
+        s = &g_scr;
+    }
+
+    /* Midpoint circle algorithm */
+    cur.x = radius;
+    cur.y = 0;
+    deltax = 1;
+    deltay = 1;
+    err = deltax - (radius << 1);
+
+    while (cur.x >= cur.y) {
+        /* Draw the first octant, fiddle with coordinates to get the others */
+        draw_point(s, l_color, point(c.x + cur.x, c.y + cur.y));
+        draw_point(s, l_color, point(c.x + cur.y, c.y + cur.x));
+        draw_point(s, l_color, point(c.x - cur.x, c.y + cur.y));
+        draw_point(s, l_color, point(c.x - cur.y, c.y + cur.x));
+        draw_point(s, l_color, point(c.x + cur.x, c.y - cur.y));
+        draw_point(s, l_color, point(c.x + cur.y, c.y - cur.x));
+        draw_point(s, l_color, point(c.x - cur.x, c.y - cur.y));
+        draw_point(s, l_color, point(c.x - cur.y, c.y - cur.x));
+
+        if (err <= 0) {
+            cur.y++;
+            err += deltay;
+            deltay += 2;
+        }
+
+        if (err > 0) {
+            cur.x--;
+            deltax += 2;
+            err += deltax - (radius << 1);
         }
     }
 }
