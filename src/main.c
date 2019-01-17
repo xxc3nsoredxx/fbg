@@ -89,6 +89,27 @@ int main () {
     five[4] = point(250,50);
     draw_poly(scr, COLOR_BLUE, COLOR_NONE, five,
                 sizeof(five)/sizeof(*five), 0);
+    /* Filled 3-sided shape */
+    three[0] = point(10,210);
+    three[1] = point(10,300);
+    three[2] = point(100,300);
+    draw_poly(scr, COLOR_RED, COLOR_GREEN, three,
+                sizeof(three)/sizeof(*three), 1);
+    /* Filled 4-sided shape */
+    four[0] = point(150,230);
+    four[1] = point(120,300);
+    four[2] = point(150,250);
+    four[3] = point(200,275);
+    draw_poly(scr, COLOR_GREEN, COLOR_BLUE, four,
+                sizeof(four)/sizeof(*four), 1);
+    /* Filled 5-sided shape */
+    five[0] = point(250,300);
+    five[1] = point(300,300);
+    five[2] = point(300,250);
+    five[3] = point(275,225);
+    five[4] = point(250,250);
+    draw_poly(scr, COLOR_BLUE, COLOR_RED, five,
+                sizeof(five)/sizeof(*five), 1);
     refresh(scr);
     getchar();
 

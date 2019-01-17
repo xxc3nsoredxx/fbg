@@ -68,6 +68,11 @@ void clear (struct screen_s *s);
 void draw_point (struct screen_s *s, unsigned int color, struct point_s p);
 
 /*
+ * Gets the color at the specified point
+ */
+unsigned int get_point (struct screen_s *s, struct point_s point);
+
+/*
  * Draws a line between p1 amd p2
  */
 void draw_line (struct screen_s *s, unsigned int color,

@@ -16,6 +16,13 @@
                      write(STDERR,MSG,strlen(MSG)); \
                  } while (0)
 
+/* Toggles a variable */
+#define TOGGLE(X) X = ((X) ? 0 : 1)
+/* Gets the minimum */
+#define MIN(X,Y) (((X) < (Y)) ? (X) : (Y))
+/* Gets the maximum */
+#define MAX(X,Y) (((X) > (Y)) ? (X) : (Y))
+
 int fb_file;
 struct fb_var_screeninfo vinfo;
 struct fb_fix_screeninfo finfo;
@@ -125,6 +132,24 @@ void draw_point (struct screen_s *s, unsigned int color, struct point_s p) {
     pos = (y * (s->ll / (s->bpp / 8))) + x;
 
     *(s->fb + pos) = color;
+}
+
+unsigned int get_point (struct screen_s *s, struct point_s point) {
+    size_t pos;
+    unsigned int x = point.x;
+    unsigned int y = point.y;
+
+    if (!s) {
+        s = &g_scr;
+    }
+
+    if (x >= s->width || y >= s->height) {
+        return 0;
+    }
+
+    pos = (y * (s->ll / (s->bpp / 8))) + x;
+
+    return *(s->fb + pos);
 }
 
 void draw_line (struct screen_s *s, unsigned int color,
@@ -327,6 +352,11 @@ void draw_circle (struct screen_s *s, unsigned int l_color,
 void draw_poly (struct screen_s *s, unsigned int l_color, unsigned int f_color,
                 struct point_s *points, size_t len, char fill) {
     size_t cx;
+    struct screen_s canvas;
+    struct point_s p;
+    char filling = 0;
+    struct point_s tl;
+    struct point_s br;
 
     if (!s) {
         s = &g_scr;
@@ -337,8 +367,68 @@ void draw_poly (struct screen_s *s, unsigned int l_color, unsigned int f_color,
         return;
     }
 
+    /* Copy screen attributes */
+    canvas.width = s->width;
+    canvas.height = s->height;
+    canvas.ll = s->ll;
+    canvas.bpp = s->bpp;
+    canvas.len = s->len;
+    canvas.fb = calloc(canvas.len, 1);
+
+    tl = points[0];
+    br = tl;
+
+    /* Draw polygon edges to the canvas */
     for (cx = 0; cx < len - 1; cx++) {
-        draw_line(s, l_color, points[cx], points[cx + 1]);
+        draw_line(&canvas, l_color, points[cx], points[cx + 1]);
+
+        /* Bounds */
+        tl.x = MIN(tl.x, points[cx].x);
+        tl.y = MIN(tl.y, points[cx].y);
+        br.x = MAX(br.x, points[cx].x);
+        br.y = MAX(br.y, points[cx].y);
     }
-    draw_line(s, l_color, points[len - 1], points[0]);
+    draw_line(&canvas, l_color, points[len - 1], points[0]);
+    tl.x = MIN(tl.x, points[len - 1].x);
+    tl.y = MIN(tl.y, points[len - 1].y);
+    br.x = MAX(br.x, points[len - 1].x);
+    br.y = MAX(br.y, points[len - 1].y);
+
+    /* Copy canvas to screen */
+    p = tl;
+    br.x++;
+    br.y++;
+    for (; p.y < br.y; p.y++) {
+        unsigned int num = 0;
+        filling = 0;
+
+        /* First, count the number of polygon edge points in row */
+        for (; fill && p.x < br.x; p.x++) {
+            unsigned int c = get_point(&canvas, p);
+            unsigned int prev = get_point(&canvas, point(p.x - 1, p.y));
+
+            if (c == l_color && prev != l_color) {
+                num++;
+            }
+        }
+
+        for (p.x = tl.x; p.x < br.x; p.x++) {
+            unsigned int c = get_point(&canvas, p);
+            unsigned int prev = get_point(&canvas, point(p.x - 1, p.y));
+
+            if (c) {
+                draw_point(s, c, p);
+                continue;
+            } else if (prev == l_color && (num > 1)) {
+                TOGGLE(filling);
+            }
+
+            /* Fill the polygons line by line */
+            if (fill && filling) {
+                draw_point(s, f_color, p);
+            }
+        }
+    }
+
+    free(canvas.fb);
 }
